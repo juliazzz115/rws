@@ -547,6 +547,7 @@
         let clients = []; // Клиенты добавленные в таблицу
         let selectedClientNIP = null; // Выбранный клиент для добавления
         let currentFocusIndex = -1; // Текущий выделенный элемент в dropdown
+        let isSaving = false; // Флаг блокировки синхронизации во время сохранения
 
         // Инициализация приложения
         async function initApp() {
@@ -729,7 +730,7 @@
             hideAutocomplete();
         }
 
-        function updateTable() {
+        function updateTable(skipSave = false) {
             const tbody = document.getElementById('tableBody');
 
             if (clients.length === 0) {
@@ -741,6 +742,7 @@
                     </tr>
                 `;
                 updateStats();
+                if (!skipSave) saveData();
                 return;
             }
 
@@ -818,6 +820,7 @@
             }).join('');
 
             updateStats();
+            if (!skipSave) saveData();
         }
 
         function updateClientType(clientId, type) {
@@ -862,26 +865,35 @@
 
         // Сохранение данных (localStorage + сервер)
         async function saveData() {
-            // Сохранение в localStorage как резервная копия
-            localStorage.setItem('clientsData', JSON.stringify(clients));
-            localStorage.setItem('availableClientsData', JSON.stringify(availableClients));
+            // Блокируем синхронизацию во время сохранения
+            isSaving = true;
 
-            // Синхронизация с сервером
-            if (useServerSync) {
-                try {
-                    await fetch('/api/data', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            clients: clients,
-                            availableClients: availableClients
-                        })
-                    });
-                } catch (error) {
-                    console.error('Ошибка сохранения на сервер:', error);
+            try {
+                // Сохранение в localStorage как резервная копия
+                localStorage.setItem('clientsData', JSON.stringify(clients));
+                localStorage.setItem('availableClientsData', JSON.stringify(availableClients));
+
+                // Синхронизация с сервером
+                if (useServerSync) {
+                    try {
+                        await fetch('/api/data', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                clients: clients,
+                                availableClients: availableClients
+                            })
+                        });
+                        console.log('✅ Данные сохранены на сервер');
+                    } catch (error) {
+                        console.error('❌ Ошибка сохранения на сервер:', error);
+                    }
                 }
+            } finally {
+                // Разблокируем синхронизацию после завершения сохранения
+                isSaving = false;
             }
         }
 
@@ -894,7 +906,7 @@
                         const data = await response.json();
                         if (data.clients && data.clients.length > 0) {
                             clients = data.clients;
-                            updateTable();
+                            updateTable(true); // skipSave=true, чтобы не сохранять сразу после загрузки
                         } else {
                             loadFromLocalStorage();
                         }
@@ -925,6 +937,12 @@
 
         // Синхронизация с сервера (периодическая)
         async function syncFromServer() {
+            // Пропускаем синхронизацию если идет сохранение
+            if (isSaving) {
+                console.log('⏸️ Пропуск синхронизации - идет сохранение');
+                return;
+            }
+
             try {
                 const response = await fetch('/api/data');
                 if (response.ok) {
@@ -933,16 +951,19 @@
                     // Обновляем клиентов если данные изменились
                     if (data.clients && JSON.stringify(data.clients) !== JSON.stringify(clients)) {
                         clients = data.clients;
-                        updateTable();
+                        // Обновляем таблицу БЕЗ вызова saveData (чтобы избежать рекурсии)
+                        updateTable(true); // skipSave=true
+                        console.log('🔄 Синхронизация: обновлено клиентов');
                     }
 
                     // Обновляем доступных клиентов если данные изменились
                     if (data.availableClients && JSON.stringify(data.availableClients) !== JSON.stringify(availableClients)) {
                         availableClients = data.availableClients;
+                        console.log('🔄 Синхронизация: обновлено доступных клиентов');
                     }
                 }
             } catch (error) {
-                console.error('Ошибка синхронизации:', error);
+                console.error('❌ Ошибка синхронизации:', error);
             }
         }
 
@@ -950,7 +971,7 @@
             const saved = localStorage.getItem('clientsData');
             if (saved) {
                 clients = JSON.parse(saved);
-                updateTable();
+                updateTable(true); // skipSave=true, чтобы не сохранять сразу после загрузки
             }
 
             const savedAvailable = localStorage.getItem('availableClientsData');
@@ -958,13 +979,6 @@
                 availableClients = JSON.parse(savedAvailable);
             }
         }
-
-        // Автосохранение при изменениях
-        const originalUpdateTable = updateTable;
-        updateTable = function() {
-            originalUpdateTable();
-            saveData();
-        };
 
         // Загрузка CSV файла
         function loadCSV(event) {
