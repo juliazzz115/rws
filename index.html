@@ -81,6 +81,7 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         input[type="text"] {
@@ -89,7 +90,8 @@
         }
 
         input[type="text"]::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         input[type="text"]:focus {
@@ -109,6 +111,7 @@
         select option {
             background: rgba(129, 212, 250, 0.95);
             color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         select:focus {
@@ -124,6 +127,8 @@
             cursor: pointer;
             font-weight: 600;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
         }
 
         button:hover {
@@ -156,6 +161,8 @@
             text-align: left;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             color: #ffffff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
         }
 
         th {
@@ -165,7 +172,10 @@
             font-size: 14px;
             position: sticky;
             top: 0;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            text-shadow:
+                0 1px 3px rgba(0, 0, 0, 0.4),
+                0 0 10px rgba(0, 0, 0, 0.5);
+            -webkit-text-stroke: 0.4px rgba(0, 0, 0, 0.3);
         }
 
         tr:hover {
@@ -184,13 +194,16 @@
             gap: 5px;
             cursor: pointer;
             color: #ffffff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
         }
 
         input[type="checkbox"], input[type="radio"] {
             width: 16px;
             height: 16px;
             cursor: pointer;
-            accent-color: rgba(255, 255, 255, 0.9);
+            accent-color: #81d4fa;
+            filter: brightness(1.2);
         }
 
         .status-select {
@@ -202,6 +215,7 @@
             font-size: 13px;
             transition: all 0.2s ease;
             color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         .status-select:focus {
@@ -221,6 +235,8 @@
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
         }
 
         .delete-btn:hover {
@@ -232,8 +248,10 @@
         .empty-state {
             text-align: center;
             padding: 40px;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 18px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
         }
 
         .stats {
@@ -262,13 +280,18 @@
             font-weight: 700;
             margin-bottom: 8px;
             color: #ffffff;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            text-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.4),
+                0 0 15px rgba(0, 0, 0, 0.5);
+            -webkit-text-stroke: 0.4px rgba(0, 0, 0, 0.3);
         }
 
         .stat-label {
             font-size: 0.85em;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.9);
             font-weight: 500;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
         }
 
         .file-input {
@@ -340,6 +363,8 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.2s ease;
             color: #ffffff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
         }
 
         .autocomplete-item:hover {
@@ -357,8 +382,10 @@
 
         .autocomplete-empty {
             padding: 10px 15px;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.8);
             font-style: italic;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
         }
 
         /* Адаптив для планшетов */
