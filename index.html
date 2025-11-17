@@ -232,9 +232,6 @@
     </style>
 </head>
 <body>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <div class="container">
         <h1>Учет клиентов</h1>
 
@@ -291,27 +288,20 @@
     </div>
 
     <script>
-        // Конфигурация Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDemoKey-ReplaceWithYourOwnKey123456",
-            authDomain: "client-tracker-demo.firebaseapp.com",
-            databaseURL: "https://client-tracker-demo-default-rtdb.firebaseio.com",
-            projectId: "client-tracker-demo",
-            storageBucket: "client-tracker-demo.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef123456"
-        };
+        // Проверка, запущен ли сервер (есть ли API)
+        let useServerSync = false;
 
-        // Инициализация Firebase
-        let database;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            database = firebase.database();
-            console.log('Firebase инициализирован успешно');
-        } catch (error) {
-            console.error('Ошибка инициализации Firebase:', error);
-            alert('⚠️ Для синхронизации между устройствами нужно настроить Firebase.\nСм. инструкции в README.md');
-        }
+        // Проверяем доступность API
+        fetch('/api/data')
+            .then(response => {
+                if (response.ok) {
+                    useServerSync = true;
+                    console.log('Синхронизация с сервером включена');
+                }
+            })
+            .catch(() => {
+                console.log('Работа в локальном режиме (только localStorage)');
+            });
 
         let availableClients = []; // Клиенты загруженные из CSV, доступные для выбора
         let clients = []; // Клиенты добавленные в таблицу
@@ -550,72 +540,92 @@
                 clients.filter(c => c.verified || (c.type === 'paid' && c.marked)).length;
         }
 
-        // Сохранение данных (localStorage + Firebase)
-        function saveData() {
+        // Сохранение данных (localStorage + сервер)
+        async function saveData() {
             // Сохранение в localStorage как резервная копия
             localStorage.setItem('clientsData', JSON.stringify(clients));
             localStorage.setItem('availableClientsData', JSON.stringify(availableClients));
 
-            // Синхронизация с Firebase
-            if (database) {
+            // Синхронизация с сервером
+            if (useServerSync) {
                 try {
-                    database.ref('clients').set(clients);
-                    database.ref('availableClients').set(availableClients);
+                    await fetch('/api/data', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            clients: clients,
+                            availableClients: availableClients
+                        })
+                    });
                 } catch (error) {
-                    console.error('Ошибка сохранения в Firebase:', error);
+                    console.error('Ошибка сохранения на сервер:', error);
                 }
             }
         }
 
-        // Загрузка данных (из Firebase или localStorage)
-        function loadData() {
-            if (database) {
-                // Загрузка из Firebase
-                database.ref('clients').once('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        clients = data;
-                        updateTable();
+        // Загрузка данных (из сервера или localStorage)
+        async function loadData() {
+            if (useServerSync) {
+                try {
+                    const response = await fetch('/api/data');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.clients && data.clients.length > 0) {
+                            clients = data.clients;
+                            updateTable();
+                        } else {
+                            loadFromLocalStorage();
+                        }
+
+                        if (data.availableClients && data.availableClients.length > 0) {
+                            availableClients = data.availableClients;
+                            updateClientSelect();
+                        } else {
+                            const savedAvailable = localStorage.getItem('availableClientsData');
+                            if (savedAvailable) {
+                                availableClients = JSON.parse(savedAvailable);
+                                updateClientSelect();
+                            }
+                        }
+
+                        // Периодическая синхронизация с сервером (каждые 5 секунд)
+                        setInterval(syncFromServer, 5000);
                     } else {
-                        // Если в Firebase нет данных, загружаем из localStorage
                         loadFromLocalStorage();
                     }
-                });
+                } catch (error) {
+                    console.error('Ошибка загрузки с сервера:', error);
+                    loadFromLocalStorage();
+                }
+            } else {
+                // Загрузка только из localStorage если сервер недоступен
+                loadFromLocalStorage();
+            }
+        }
 
-                database.ref('availableClients').once('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        availableClients = data;
-                        updateClientSelect();
-                    } else {
-                        // Если в Firebase нет данных, загружаем из localStorage
-                        const savedAvailable = localStorage.getItem('availableClientsData');
-                        if (savedAvailable) {
-                            availableClients = JSON.parse(savedAvailable);
-                            updateClientSelect();
-                        }
-                    }
-                });
+        // Синхронизация с сервера (периодическая)
+        async function syncFromServer() {
+            try {
+                const response = await fetch('/api/data');
+                if (response.ok) {
+                    const data = await response.json();
 
-                // Слушаем изменения в реальном времени
-                database.ref('clients').on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if (data && JSON.stringify(data) !== JSON.stringify(clients)) {
-                        clients = data;
+                    // Обновляем клиентов если данные изменились
+                    if (data.clients && JSON.stringify(data.clients) !== JSON.stringify(clients)) {
+                        clients = data.clients;
                         updateTable();
                     }
-                });
 
-                database.ref('availableClients').on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if (data && JSON.stringify(data) !== JSON.stringify(availableClients)) {
-                        availableClients = data;
+                    // Обновляем доступных клиентов если данные изменились
+                    if (data.availableClients && JSON.stringify(data.availableClients) !== JSON.stringify(availableClients)) {
+                        availableClients = data.availableClients;
                         updateClientSelect();
                     }
-                });
-            } else {
-                // Загрузка только из localStorage если Firebase недоступен
-                loadFromLocalStorage();
+                }
+            } catch (error) {
+                console.error('Ошибка синхронизации:', error);
             }
         }
 

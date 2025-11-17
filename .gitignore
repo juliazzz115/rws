@@ -10,6 +10,9 @@ npm-debug.log*
 .env
 .env.local
 
+# Data files
+data.json
+
 # OS files
 .DS_Store
 Thumbs.db
