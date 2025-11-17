@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #b3e5fc 0%, #81d4fa 100%);
+            background: #ffffff;
             min-height: 100vh;
             padding: 20px;
             position: relative;
@@ -27,9 +27,9 @@
             right: 0;
             bottom: 0;
             background:
-                radial-gradient(circle at 20% 50%, rgba(168, 218, 234, 0.4), transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(135, 206, 235, 0.4), transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(176, 224, 230, 0.4), transparent 50%);
+                radial-gradient(circle at 20% 50%, rgba(179, 229, 252, 0.15), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(129, 212, 250, 0.15), transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(179, 229, 252, 0.15), transparent 50%);
             pointer-events: none;
             z-index: 0;
         }
@@ -37,29 +37,26 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(129, 212, 250, 0.3);
             box-shadow:
-                0 8px 32px 0 rgba(31, 38, 135, 0.37),
-                inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+                0 8px 32px 0 rgba(129, 212, 250, 0.2),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
             padding: 30px;
             position: relative;
             z-index: 1;
         }
 
         h1 {
-            color: #ffffff;
+            color: #000000;
             margin-bottom: 30px;
             text-align: center;
             font-size: 2em;
             font-weight: 700;
-            text-shadow:
-                0 2px 10px rgba(0, 0, 0, 0.3),
-                0 0 20px rgba(0, 0, 0, 0.5);
-            -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 1px 2px rgba(129, 212, 250, 0.3);
             letter-spacing: 2px;
         }
 
@@ -73,15 +70,15 @@
 
         input[type="text"], select, button {
             padding: 10px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(129, 212, 250, 0.4);
             border-radius: 12px;
             font-size: 14px;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            color: #ffffff;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            color: #000000;
+            text-shadow: none;
         }
 
         input[type="text"] {
@@ -90,51 +87,51 @@
         }
 
         input[type="text"]::placeholder {
-            color: rgba(255, 255, 255, 0.8);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            color: rgba(0, 0, 0, 0.4);
+            text-shadow: none;
         }
 
         input[type="text"]:focus {
             outline: none;
-            border-color: rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.25);
-            box-shadow: 0 4px 12px rgba(129, 212, 250, 0.4);
+            border-color: #81d4fa;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 12px rgba(129, 212, 250, 0.3);
         }
 
         select {
             min-width: 200px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.8);
             cursor: pointer;
-            color: #ffffff;
+            color: #000000;
         }
 
         select option {
-            background: rgba(129, 212, 250, 0.95);
-            color: #ffffff;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            background: #ffffff;
+            color: #000000;
+            text-shadow: none;
         }
 
         select:focus {
             outline: none;
-            border-color: rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.25);
+            border-color: #81d4fa;
+            background: rgba(255, 255, 255, 0.95);
         }
 
         button {
-            background: rgba(255, 255, 255, 0.25);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(129, 212, 250, 0.3);
+            color: #000000;
+            border: 1px solid rgba(129, 212, 250, 0.5);
             cursor: pointer;
             font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(129, 212, 250, 0.2);
+            text-shadow: none;
+            -webkit-text-stroke: 0;
         }
 
         button:hover {
-            background: rgba(255, 255, 255, 0.35);
+            background: rgba(129, 212, 250, 0.5);
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 6px 16px rgba(129, 212, 250, 0.3);
         }
 
         button:active {
@@ -149,7 +146,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 12px;
@@ -159,27 +156,25 @@
         th, td {
             padding: 15px;
             text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(129, 212, 250, 0.2);
+            color: #000000;
+            text-shadow: none;
+            -webkit-text-stroke: 0;
         }
 
         th {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
+            background: rgba(129, 212, 250, 0.3);
+            color: #000000;
             font-weight: 600;
             font-size: 14px;
             position: sticky;
             top: 0;
-            text-shadow:
-                0 1px 3px rgba(0, 0, 0, 0.4),
-                0 0 10px rgba(0, 0, 0, 0.5);
-            -webkit-text-stroke: 0.4px rgba(0, 0, 0, 0.3);
+            text-shadow: none;
+            -webkit-text-stroke: 0;
         }
 
         tr:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(129, 212, 250, 0.1);
         }
 
         .checkbox-group {
@@ -193,9 +188,9 @@
             align-items: center;
             gap: 5px;
             cursor: pointer;
-            color: #ffffff;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
+            color: #000000;
+            text-shadow: none;
+            -webkit-text-stroke: 0;
         }
 
         input[type="checkbox"], input[type="radio"] {
@@ -208,26 +203,26 @@
 
         .status-select {
             padding: 6px 10px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(129, 212, 250, 0.4);
             border-radius: 8px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.8);
             cursor: pointer;
             font-size: 13px;
             transition: all 0.2s ease;
-            color: #ffffff;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            color: #000000;
+            text-shadow: none;
         }
 
         .status-select:focus {
             outline: none;
-            border-color: rgba(255, 255, 255, 0.5);
-            background: rgba(255, 255, 255, 0.25);
+            border-color: #81d4fa;
+            background: rgba(255, 255, 255, 0.95);
         }
 
         .delete-btn {
-            background: rgba(231, 76, 60, 0.6);
+            background: rgba(231, 76, 60, 0.8);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(231, 76, 60, 0.8);
             padding: 6px 12px;
             border-radius: 8px;
             cursor: pointer;
@@ -235,23 +230,23 @@
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
+            text-shadow: none;
+            -webkit-text-stroke: 0;
         }
 
         .delete-btn:hover {
-            background: rgba(192, 57, 43, 0.7);
+            background: rgba(192, 57, 43, 0.9);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
         }
 
         .empty-state {
             text-align: center;
             padding: 40px;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(0, 0, 0, 0.6);
             font-size: 18px;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
+            text-shadow: none;
+            -webkit-text-stroke: 0;
         }
 
         .stats {
@@ -265,33 +260,31 @@
             flex: 1;
             min-width: 150px;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            color: #ffffff;
+            color: #000000;
             border-radius: 16px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(129, 212, 250, 0.3);
+            box-shadow: 0 4px 12px rgba(129, 212, 250, 0.15);
         }
 
         .stat-number {
             font-size: 2.2em;
             font-weight: 700;
             margin-bottom: 8px;
-            color: #ffffff;
-            text-shadow:
-                0 2px 8px rgba(0, 0, 0, 0.4),
-                0 0 15px rgba(0, 0, 0, 0.5);
-            -webkit-text-stroke: 0.4px rgba(0, 0, 0, 0.3);
+            color: #81d4fa;
+            text-shadow: none;
+            -webkit-text-stroke: 0;
         }
 
         .stat-label {
             font-size: 0.85em;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(0, 0, 0, 0.7);
             font-weight: 500;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
+            text-shadow: none;
+            -webkit-text-stroke: 0;
         }
 
         .file-input {
@@ -305,23 +298,25 @@
         }
 
         .btn-secondary {
-            background: rgba(149, 165, 166, 0.3);
+            background: rgba(149, 165, 166, 0.5);
+            color: #000000;
             font-size: 12px;
             padding: 8px 12px;
         }
 
         .btn-secondary:hover {
-            background: rgba(127, 140, 141, 0.4);
+            background: rgba(127, 140, 141, 0.6);
         }
 
         .btn-success {
-            background: rgba(39, 174, 96, 0.3);
+            background: rgba(39, 174, 96, 0.5);
+            color: #000000;
             font-size: 12px;
             padding: 8px 12px;
         }
 
         .btn-success:hover {
-            background: rgba(34, 153, 84, 0.4);
+            background: rgba(34, 153, 84, 0.6);
         }
 
         /* Autocomplete стили */
@@ -342,13 +337,13 @@
             right: 0;
             max-height: 300px;
             overflow-y: auto;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(129, 212, 250, 0.4);
             border-top: none;
             border-radius: 0 0 12px 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 16px rgba(129, 212, 250, 0.2);
             z-index: 1000;
             display: none;
         }
@@ -360,32 +355,32 @@
         .autocomplete-item {
             padding: 10px 15px;
             cursor: pointer;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(129, 212, 250, 0.2);
             transition: all 0.2s ease;
-            color: #ffffff;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
+            color: #000000;
+            text-shadow: none;
+            -webkit-text-stroke: 0;
         }
 
         .autocomplete-item:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(129, 212, 250, 0.2);
         }
 
         .autocomplete-item.selected {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(129, 212, 250, 0.3);
         }
 
         .autocomplete-item strong {
-            color: #ffffff;
+            color: #000000;
             font-weight: 700;
         }
 
         .autocomplete-empty {
             padding: 10px 15px;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(0, 0, 0, 0.5);
             font-style: italic;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.3);
+            text-shadow: none;
+            -webkit-text-stroke: 0;
         }
 
         /* Адаптив для планшетов */
