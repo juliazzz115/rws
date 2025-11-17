@@ -196,6 +196,32 @@
             font-size: 0.9em;
             opacity: 0.9;
         }
+
+        .file-input {
+            display: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            background: #48dbfb;
+        }
+
+        .btn-secondary:hover {
+            background: #0abde3;
+        }
+
+        .btn-success {
+            background: #1dd1a1;
+        }
+
+        .btn-success:hover {
+            background: #10ac84;
+        }
     </style>
 </head>
 <body>
@@ -230,6 +256,13 @@
                 <option value="Новикова Елена">Новикова Елена</option>
             </select>
             <button onclick="addClient()">➕ Добавить клиента</button>
+        </div>
+
+        <div class="button-group" style="margin-bottom: 20px;">
+            <input type="file" id="csvFileInput" class="file-input" accept=".csv" onchange="loadCSV(event)">
+            <button class="btn-secondary" onclick="document.getElementById('csvFileInput').click()">📂 Загрузить CSV</button>
+            <button class="btn-success" onclick="exportToCSV()">💾 Экспортировать в CSV</button>
+            <button class="btn-secondary" onclick="clearAllData()">🗑️ Очистить все данные</button>
         </div>
 
         <div class="table-container">
@@ -425,6 +458,133 @@
             originalUpdateTable();
             saveData();
         };
+
+        // Загрузка CSV файла
+        function loadCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                parseCSV(text);
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // Парсинг CSV
+        function parseCSV(text) {
+            const lines = text.split('\n').filter(line => line.trim());
+            if (lines.length === 0) {
+                alert('CSV файл пуст!');
+                return;
+            }
+
+            // Пропускаем заголовок, если он есть
+            const startIndex = lines[0].toLowerCase().includes('имя') ||
+                             lines[0].toLowerCase().includes('name') ? 1 : 0;
+
+            let addedCount = 0;
+            let skippedCount = 0;
+
+            for (let i = startIndex; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                const columns = line.split(/[,;]/);  // Поддержка как запятой, так и точки с запятой
+                const name = columns[0].trim().replace(/^["']|["']$/g, ''); // Удаляем кавычки
+
+                if (!name) continue;
+
+                // Проверяем, не добавлен ли уже этот клиент
+                if (clients.some(c => c.name === name)) {
+                    skippedCount++;
+                    continue;
+                }
+
+                // Создаем клиента
+                const client = {
+                    id: Date.now() + i,
+                    name: name,
+                    submitted: columns[1] === 'true' || columns[1] === '1',
+                    self: columns[2] === 'true' || columns[2] === '1',
+                    marked: columns[3] === 'true' || columns[3] === '1',
+                    checked: columns[4] === 'true' || columns[4] === '1',
+                    paymentStatus: columns[5] ? columns[5].trim() : 'Не оплачено'
+                };
+
+                clients.push(client);
+                addedCount++;
+
+                // Добавляем в выпадающий список, если его там нет
+                updateClientSelectOptions(name);
+            }
+
+            updateTable();
+
+            let message = `Загружено: ${addedCount} клиент(ов)`;
+            if (skippedCount > 0) {
+                message += `\nПропущено (уже есть в списке): ${skippedCount} клиент(ов)`;
+            }
+            alert(message);
+
+            // Очищаем input для возможности повторной загрузки того же файла
+            event.target.value = '';
+        }
+
+        // Обновление выпадающего списка клиентов
+        function updateClientSelectOptions(newName) {
+            const select = document.getElementById('clientSelect');
+            const existingOptions = Array.from(select.options).map(opt => opt.value);
+
+            if (!existingOptions.includes(newName)) {
+                const option = document.createElement('option');
+                option.value = newName;
+                option.textContent = newName;
+                select.appendChild(option);
+            }
+        }
+
+        // Экспорт в CSV
+        function exportToCSV() {
+            if (clients.length === 0) {
+                alert('Нет данных для экспорта!');
+                return;
+            }
+
+            let csv = 'Имя клиента,Подал,Сам,Пометить,Проверить,Статус оплаты\n';
+
+            clients.forEach(client => {
+                csv += `"${client.name}",`;
+                csv += `${client.submitted ? '1' : '0'},`;
+                csv += `${client.self ? '1' : '0'},`;
+                csv += `${client.marked ? '1' : '0'},`;
+                csv += `${client.checked ? '1' : '0'},`;
+                csv += `"${client.paymentStatus}"\n`;
+            });
+
+            // Создаем blob и скачиваем файл
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            link.setAttribute('href', url);
+            link.setAttribute('download', `clients_${new Date().toISOString().slice(0,10)}.csv`);
+            link.style.visibility = 'hidden';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Очистка всех данных
+        function clearAllData() {
+            if (confirm('Вы уверены, что хотите удалить ВСЕ данные? Это действие нельзя отменить!')) {
+                clients = [];
+                updateTable();
+                alert('Все данные удалены!');
+            }
+        }
 
         // Загрузка данных при старте
         loadData();
