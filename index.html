@@ -290,21 +290,27 @@
     <script>
         // Проверка, запущен ли сервер (есть ли API)
         let useServerSync = false;
-
-        // Проверяем доступность API
-        fetch('/api/data')
-            .then(response => {
-                if (response.ok) {
-                    useServerSync = true;
-                    console.log('Синхронизация с сервером включена');
-                }
-            })
-            .catch(() => {
-                console.log('Работа в локальном режиме (только localStorage)');
-            });
-
         let availableClients = []; // Клиенты загруженные из CSV, доступные для выбора
         let clients = []; // Клиенты добавленные в таблицу
+
+        // Инициализация приложения
+        async function initApp() {
+            // Проверяем доступность API
+            try {
+                const response = await fetch('/api/data');
+                if (response.ok) {
+                    useServerSync = true;
+                    console.log('✅ Синхронизация с сервером включена');
+                } else {
+                    console.log('📱 Работа в локальном режиме (только localStorage)');
+                }
+            } catch (error) {
+                console.log('📱 Работа в локальном режиме (только localStorage)');
+            }
+
+            // Загружаем данные после проверки сервера
+            await loadData();
+        }
 
         function addClient() {
             const select = document.getElementById('clientSelect');
@@ -709,6 +715,9 @@
             // Обновляем выпадающий список
             updateClientSelect();
 
+            // ВАЖНО: Сохраняем данные на сервер для синхронизации!
+            saveData();
+
             let message = `Загружено клиентов в список: ${addedCount}`;
             if (skippedCount > 0) {
                 message += `\nПропущено (уже есть): ${skippedCount}`;
@@ -762,8 +771,8 @@
             }
         }
 
-        // Загрузка данных при старте
-        loadData();
+        // Инициализация приложения при старте
+        initApp();
     </script>
 </body>
 </html>
