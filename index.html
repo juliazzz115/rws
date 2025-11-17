@@ -229,6 +229,174 @@
         .btn-success:hover {
             background: #229954;
         }
+
+        /* Адаптив для планшетов */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.4em;
+                margin-bottom: 20px;
+            }
+
+            .stats {
+                gap: 10px;
+            }
+
+            .stat-card {
+                min-width: 120px;
+                padding: 12px;
+            }
+
+            .stat-number {
+                font-size: 1.5em;
+            }
+
+            .stat-label {
+                font-size: 0.8em;
+            }
+
+            .input-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            input[type="text"], select, button {
+                width: 100%;
+                font-size: 16px; /* Предотвращает зум на iOS */
+            }
+
+            select {
+                min-width: auto;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .button-group button {
+                width: 100%;
+            }
+
+            th, td {
+                padding: 10px 8px;
+                font-size: 13px;
+            }
+
+            .checkbox-group {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+
+            .status-select {
+                width: 100%;
+            }
+        }
+
+        /* Адаптив для мобильных телефонов */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                padding: 10px;
+                border-radius: 0;
+            }
+
+            h1 {
+                font-size: 1.2em;
+                margin-bottom: 15px;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .stat-card {
+                width: 100%;
+                min-width: auto;
+                padding: 10px;
+            }
+
+            .stat-number {
+                font-size: 1.3em;
+            }
+
+            .stat-label {
+                font-size: 0.75em;
+            }
+
+            input[type="text"], select, button {
+                padding: 12px;
+                font-size: 16px;
+            }
+
+            th, td {
+                padding: 8px 5px;
+                font-size: 12px;
+            }
+
+            th {
+                font-size: 13px;
+            }
+
+            .table-container {
+                margin: 0 -10px;
+            }
+
+            table {
+                font-size: 11px;
+            }
+
+            .checkbox-label {
+                font-size: 12px;
+            }
+
+            input[type="checkbox"], input[type="radio"] {
+                width: 18px;
+                height: 18px;
+            }
+
+            .delete-btn {
+                padding: 8px 10px;
+                font-size: 12px;
+                width: 100%;
+            }
+
+            .empty-state {
+                padding: 20px;
+                font-size: 14px;
+            }
+
+            button {
+                min-height: 44px; /* iOS рекомендуемый размер для кнопок */
+            }
+        }
+
+        /* Очень маленькие экраны */
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 1.1em;
+            }
+
+            .stat-number {
+                font-size: 1.2em;
+            }
+
+            th, td {
+                padding: 6px 3px;
+                font-size: 11px;
+            }
+        }
     </style>
 </head>
 <body>
