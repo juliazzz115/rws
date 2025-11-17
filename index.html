@@ -230,6 +230,62 @@
             background: #229954;
         }
 
+        /* Autocomplete стили */
+        .autocomplete-container {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .autocomplete-input {
+            width: 100%;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+        }
+
+        .autocomplete-item:hover {
+            background: #f8f9fa;
+        }
+
+        .autocomplete-item.selected {
+            background: #e3f2fd;
+        }
+
+        .autocomplete-item strong {
+            color: #3498db;
+        }
+
+        .autocomplete-empty {
+            padding: 10px 15px;
+            color: #999;
+            font-style: italic;
+        }
+
         /* Адаптив для планшетов */
         @media (max-width: 768px) {
             body {
@@ -265,6 +321,20 @@
             .input-section {
                 flex-direction: column;
                 gap: 10px;
+            }
+
+            .autocomplete-container {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .autocomplete-input {
+                font-size: 16px; /* Предотвращает зум на iOS */
+            }
+
+            .autocomplete-item {
+                padding: 12px 15px;
+                font-size: 14px;
             }
 
             input[type="text"], select, button {
@@ -333,6 +403,15 @@
 
             .stat-label {
                 font-size: 0.75em;
+            }
+
+            .autocomplete-dropdown {
+                max-height: 250px;
+            }
+
+            .autocomplete-item {
+                padding: 14px 12px;
+                font-size: 13px;
             }
 
             input[type="text"], select, button {
@@ -419,10 +498,16 @@
         </div>
 
         <div class="input-section">
-            <input type="text" id="searchInput" placeholder="Поиск клиента (NIP или название)..." oninput="filterClients()">
-            <select id="clientSelect" size="1">
-                <option value="">Выберите клиента...</option>
-            </select>
+            <div class="autocomplete-container">
+                <input type="text"
+                       id="clientInput"
+                       class="autocomplete-input"
+                       placeholder="Введите NIP или название клиента..."
+                       oninput="handleAutocomplete()"
+                       onfocus="handleAutocomplete()"
+                       onkeydown="handleKeydown(event)">
+                <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
+            </div>
             <button onclick="addClient()">Добавить в таблицу</button>
         </div>
 
@@ -460,6 +545,8 @@
         let useServerSync = false;
         let availableClients = []; // Клиенты загруженные из CSV, доступные для выбора
         let clients = []; // Клиенты добавленные в таблицу
+        let selectedClientNIP = null; // Выбранный клиент для добавления
+        let currentFocusIndex = -1; // Текущий выделенный элемент в dropdown
 
         // Инициализация приложения
         async function initApp() {
@@ -480,24 +567,140 @@
             await loadData();
         }
 
-        function addClient() {
-            const select = document.getElementById('clientSelect');
-            const selectedNIP = select.value;
+        // Autocomplete функции
+        function handleAutocomplete() {
+            const input = document.getElementById('clientInput');
+            const dropdown = document.getElementById('autocompleteDropdown');
+            const searchTerm = input.value.toLowerCase().trim();
 
-            if (!selectedNIP) {
+            currentFocusIndex = -1;
+
+            if (!searchTerm) {
+                // Показываем всех клиентов если поле пустое
+                showAllClients(dropdown);
+                return;
+            }
+
+            // Фильтруем клиентов
+            const filteredClients = availableClients.filter(client => {
+                const nipMatch = client.nip.toLowerCase().includes(searchTerm);
+                const nazwaMatch = client.nazwa.toLowerCase().includes(searchTerm);
+                return nipMatch || nazwaMatch;
+            });
+
+            displayAutocompleteResults(dropdown, filteredClients, searchTerm);
+        }
+
+        function showAllClients(dropdown) {
+            if (availableClients.length === 0) {
+                dropdown.innerHTML = '<div class="autocomplete-empty">Загрузите CSV файл с клиентами</div>';
+                dropdown.classList.add('show');
+                return;
+            }
+
+            displayAutocompleteResults(dropdown, availableClients, '');
+        }
+
+        function displayAutocompleteResults(dropdown, clients, searchTerm) {
+            dropdown.innerHTML = '';
+
+            if (clients.length === 0) {
+                dropdown.innerHTML = '<div class="autocomplete-empty">Ничего не найдено</div>';
+                dropdown.classList.add('show');
+                return;
+            }
+
+            clients.forEach((client, index) => {
+                const div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.dataset.nip = client.nip;
+                div.dataset.index = index;
+
+                // Подсвечиваем совпадения
+                let displayText = `${client.nip} - ${client.nazwa}`;
+                if (searchTerm) {
+                    const regex = new RegExp(`(${searchTerm})`, 'gi');
+                    displayText = displayText.replace(regex, '<strong>$1</strong>');
+                }
+
+                div.innerHTML = displayText;
+                div.onclick = () => selectClient(client.nip);
+                dropdown.appendChild(div);
+            });
+
+            dropdown.classList.add('show');
+        }
+
+        function selectClient(nip) {
+            const client = availableClients.find(c => c.nip === nip);
+            if (client) {
+                const input = document.getElementById('clientInput');
+                input.value = `${client.nip} - ${client.nazwa}`;
+                selectedClientNIP = nip;
+                hideAutocomplete();
+            }
+        }
+
+        function hideAutocomplete() {
+            const dropdown = document.getElementById('autocompleteDropdown');
+            dropdown.classList.remove('show');
+            currentFocusIndex = -1;
+        }
+
+        function handleKeydown(event) {
+            const dropdown = document.getElementById('autocompleteDropdown');
+            const items = dropdown.querySelectorAll('.autocomplete-item');
+
+            if (items.length === 0) return;
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                currentFocusIndex++;
+                if (currentFocusIndex >= items.length) currentFocusIndex = 0;
+                setActiveItem(items);
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                currentFocusIndex--;
+                if (currentFocusIndex < 0) currentFocusIndex = items.length - 1;
+                setActiveItem(items);
+            } else if (event.key === 'Enter') {
+                event.preventDefault();
+                if (currentFocusIndex > -1 && items[currentFocusIndex]) {
+                    items[currentFocusIndex].click();
+                } else {
+                    addClient();
+                }
+            } else if (event.key === 'Escape') {
+                hideAutocomplete();
+            }
+        }
+
+        function setActiveItem(items) {
+            items.forEach((item, index) => {
+                if (index === currentFocusIndex) {
+                    item.classList.add('selected');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        function addClient() {
+            if (!selectedClientNIP) {
                 alert('Пожалуйста, выберите клиента из списка!');
                 return;
             }
 
             // Находим клиента в доступных
-            const availableClient = availableClients.find(c => c.nip === selectedNIP);
+            const availableClient = availableClients.find(c => c.nip === selectedClientNIP);
             if (!availableClient) {
                 alert('Клиент не найден!');
                 return;
             }
 
             // Проверяем, не добавлен ли уже этот клиент в таблицу
-            if (clients.some(c => c.nip === selectedNIP)) {
+            if (clients.some(c => c.nip === selectedClientNIP)) {
                 alert('Этот клиент уже добавлен в таблицу!');
                 return;
             }
@@ -518,69 +721,12 @@
 
             clients.push(client);
             updateTable();
-            select.value = '';
 
-            // Очищаем поле поиска и восстанавливаем полный список
-            const searchInput = document.getElementById('searchInput');
-            searchInput.value = '';
-            updateClientSelect();
-        }
-
-        // Обновление выпадающего списка
-        function updateClientSelect() {
-            const select = document.getElementById('clientSelect');
-            // Сохраняем текущее значение
-            const currentValue = select.value;
-
-            // Очищаем список (кроме первого элемента)
-            select.innerHTML = '<option value="">Выберите клиента...</option>';
-
-            // Добавляем всех доступных клиентов
-            availableClients.forEach(client => {
-                const option = document.createElement('option');
-                option.value = client.nip;
-                option.textContent = `${client.nip} - ${client.nazwa}`;
-                select.appendChild(option);
-            });
-
-            // Восстанавливаем выбранное значение если оно еще есть
-            if (currentValue && availableClients.some(c => c.nip === currentValue)) {
-                select.value = currentValue;
-            }
-        }
-
-        // Фильтрация клиентов по поисковому запросу
-        function filterClients() {
-            const searchInput = document.getElementById('searchInput');
-            const select = document.getElementById('clientSelect');
-            const searchTerm = searchInput.value.toLowerCase().trim();
-
-            // Очищаем список
-            select.innerHTML = '<option value="">Выберите клиента...</option>';
-
-            // Фильтруем клиентов
-            const filteredClients = availableClients.filter(client => {
-                const nipMatch = client.nip.toLowerCase().includes(searchTerm);
-                const nazwaMatch = client.nazwa.toLowerCase().includes(searchTerm);
-                return nipMatch || nazwaMatch;
-            });
-
-            // Добавляем отфильтрованных клиентов
-            filteredClients.forEach(client => {
-                const option = document.createElement('option');
-                option.value = client.nip;
-                option.textContent = `${client.nip} - ${client.nazwa}`;
-                select.appendChild(option);
-            });
-
-            // Показываем количество найденных
-            if (searchTerm && filteredClients.length === 0) {
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'Ничего не найдено';
-                option.disabled = true;
-                select.appendChild(option);
-            }
+            // Очищаем поле ввода
+            const input = document.getElementById('clientInput');
+            input.value = '';
+            selectedClientNIP = null;
+            hideAutocomplete();
         }
 
         function updateTable() {
@@ -755,12 +901,10 @@
 
                         if (data.availableClients && data.availableClients.length > 0) {
                             availableClients = data.availableClients;
-                            updateClientSelect();
                         } else {
                             const savedAvailable = localStorage.getItem('availableClientsData');
                             if (savedAvailable) {
                                 availableClients = JSON.parse(savedAvailable);
-                                updateClientSelect();
                             }
                         }
 
@@ -795,7 +939,6 @@
                     // Обновляем доступных клиентов если данные изменились
                     if (data.availableClients && JSON.stringify(data.availableClients) !== JSON.stringify(availableClients)) {
                         availableClients = data.availableClients;
-                        updateClientSelect();
                     }
                 }
             } catch (error) {
@@ -813,7 +956,6 @@
             const savedAvailable = localStorage.getItem('availableClientsData');
             if (savedAvailable) {
                 availableClients = JSON.parse(savedAvailable);
-                updateClientSelect();
             }
         }
 
@@ -880,9 +1022,6 @@
                 addedCount++;
             }
 
-            // Обновляем выпадающий список
-            updateClientSelect();
-
             // ВАЖНО: Сохраняем данные на сервер для синхронизации!
             saveData();
 
@@ -938,6 +1077,16 @@
                 alert('Все данные удалены!');
             }
         }
+
+        // Закрытие autocomplete при клике вне области
+        document.addEventListener('click', function(event) {
+            const autocompleteContainer = document.querySelector('.autocomplete-container');
+            const dropdown = document.getElementById('autocompleteDropdown');
+
+            if (autocompleteContainer && !autocompleteContainer.contains(event.target)) {
+                hideAutocomplete();
+            }
+        });
 
         // Инициализация приложения при старте
         initApp();
