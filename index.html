@@ -241,12 +241,12 @@
                 <div class="stat-label">Всего клиентов</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="paidClients">0</div>
-                <div class="stat-label">Оплатили</div>
+                <div class="stat-number" id="inCRMClients">0</div>
+                <div class="stat-label">Проставлено в CRM</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="checkedClients">0</div>
-                <div class="stat-label">Проверено / Помечено</div>
+                <div class="stat-number" id="verifiedClients">0</div>
+                <div class="stat-label">Проверено</div>
             </div>
         </div>
 
@@ -466,7 +466,7 @@
                             <input type="checkbox"
                                 ${client.marked ? 'checked' : ''}
                                 onchange="toggleStatus(${client.id}, 'marked')">
-                            Помечено
+                            Проверено
                         </label>
                     `;
                 }
@@ -540,10 +540,10 @@
 
         function updateStats() {
             document.getElementById('totalClients').textContent = clients.length;
-            document.getElementById('paidClients').textContent =
-                clients.filter(c => c.type === 'paid').length;
-            document.getElementById('checkedClients').textContent =
-                clients.filter(c => c.verified || (c.type === 'paid' && c.marked)).length;
+            document.getElementById('inCRMClients').textContent =
+                clients.filter(c => c.inCRM || c.inCRM_paid).length;
+            document.getElementById('verifiedClients').textContent =
+                clients.filter(c => c.verified || c.marked).length;
         }
 
         // Сохранение данных (localStorage + сервер)
