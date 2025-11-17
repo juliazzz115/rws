@@ -254,7 +254,8 @@
         </div>
 
         <div class="input-section">
-            <select id="clientSelect">
+            <input type="text" id="searchInput" placeholder="Поиск клиента (NIP или название)..." oninput="filterClients()">
+            <select id="clientSelect" size="1">
                 <option value="">Выберите клиента...</option>
             </select>
             <button onclick="addClient()">Добавить в таблицу</button>
@@ -354,6 +355,11 @@
             clients.push(client);
             updateTable();
             select.value = '';
+
+            // Очищаем поле поиска и восстанавливаем полный список
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            updateClientSelect();
         }
 
         // Обновление выпадающего списка
@@ -376,6 +382,40 @@
             // Восстанавливаем выбранное значение если оно еще есть
             if (currentValue && availableClients.some(c => c.nip === currentValue)) {
                 select.value = currentValue;
+            }
+        }
+
+        // Фильтрация клиентов по поисковому запросу
+        function filterClients() {
+            const searchInput = document.getElementById('searchInput');
+            const select = document.getElementById('clientSelect');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+
+            // Очищаем список
+            select.innerHTML = '<option value="">Выберите клиента...</option>';
+
+            // Фильтруем клиентов
+            const filteredClients = availableClients.filter(client => {
+                const nipMatch = client.nip.toLowerCase().includes(searchTerm);
+                const nazwaMatch = client.nazwa.toLowerCase().includes(searchTerm);
+                return nipMatch || nazwaMatch;
+            });
+
+            // Добавляем отфильтрованных клиентов
+            filteredClients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.nip;
+                option.textContent = `${client.nip} - ${client.nazwa}`;
+                select.appendChild(option);
+            });
+
+            // Показываем количество найденных
+            if (searchTerm && filteredClients.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Ничего не найдено';
+                option.disabled = true;
+                select.appendChild(option);
             }
         }
 
