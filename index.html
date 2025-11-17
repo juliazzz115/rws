@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учет клиентов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        select, button {
+            padding: 12px 20px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        select {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"], input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .status-select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .status-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .delete-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #ff3838;
+            transform: scale(1.05);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 18px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 150px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Учет клиентов</h1>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalClients">0</div>
+                <div class="stat-label">Всего клиентов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="paidClients">0</div>
+                <div class="stat-label">Оплатили</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="checkedClients">0</div>
+                <div class="stat-label">Проверено</div>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <select id="clientSelect">
+                <option value="">Выберите клиента...</option>
+                <option value="Иванов Иван">Иванов Иван</option>
+                <option value="Петров Петр">Петров Петр</option>
+                <option value="Сидоров Сергей">Сидоров Сергей</option>
+                <option value="Козлова Анна">Козлова Анна</option>
+                <option value="Морозов Алексей">Морозов Алексей</option>
+                <option value="Васильева Мария">Васильева Мария</option>
+                <option value="Смирнов Дмитрий">Смирнов Дмитрий</option>
+                <option value="Новикова Елена">Новикова Елена</option>
+            </select>
+            <button onclick="addClient()">➕ Добавить клиента</button>
+        </div>
+
+        <div class="table-container">
+            <table id="clientsTable">
+                <thead>
+                    <tr>
+                        <th>Имя клиента</th>
+                        <th>Подал / Сам</th>
+                        <th>Пометить / Проверить</th>
+                        <th>Статус оплаты</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            Нет данных. Добавьте клиента из списка выше.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let clients = [];
+
+        function addClient() {
+            const select = document.getElementById('clientSelect');
+            const clientName = select.value;
+
+            if (!clientName) {
+                alert('Пожалуйста, выберите клиента!');
+                return;
+            }
+
+            // Проверяем, не добавлен ли уже этот клиент
+            if (clients.some(c => c.name === clientName)) {
+                alert('Этот клиент уже добавлен в таблицу!');
+                return;
+            }
+
+            const client = {
+                id: Date.now(),
+                name: clientName,
+                submitted: false,
+                self: false,
+                marked: false,
+                checked: false,
+                paymentStatus: 'Не оплачено'
+            };
+
+            clients.push(client);
+            updateTable();
+            select.value = '';
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('tableBody');
+
+            if (clients.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            Нет данных. Добавьте клиента из списка выше.
+                        </td>
+                    </tr>
+                `;
+                updateStats();
+                return;
+            }
+
+            tbody.innerHTML = clients.map(client => `
+                <tr>
+                    <td><strong>${client.name}</strong></td>
+                    <td>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="radio" name="type_${client.id}"
+                                    ${client.submitted ? 'checked' : ''}
+                                    onchange="updateClientType(${client.id}, 'submitted')">
+                                Подал
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="radio" name="type_${client.id}"
+                                    ${client.self ? 'checked' : ''}
+                                    onchange="updateClientType(${client.id}, 'self')">
+                                Сам
+                            </label>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox"
+                                    ${client.marked ? 'checked' : ''}
+                                    onchange="toggleMarked(${client.id})">
+                                Пометить
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox"
+                                    ${client.checked ? 'checked' : ''}
+                                    onchange="toggleChecked(${client.id})">
+                                Проверить
+                            </label>
+                        </div>
+                    </td>
+                    <td>
+                        <select class="status-select"
+                            value="${client.paymentStatus}"
+                            onchange="updatePaymentStatus(${client.id}, this.value)">
+                            <option value="Не оплачено" ${client.paymentStatus === 'Не оплачено' ? 'selected' : ''}>Не оплачено</option>
+                            <option value="Подано" ${client.paymentStatus === 'Подано' ? 'selected' : ''}>Подано</option>
+                            <option value="Помечено" ${client.paymentStatus === 'Помечено' ? 'selected' : ''}>Помечено</option>
+                            <option value="Проверено" ${client.paymentStatus === 'Проверено' ? 'selected' : ''}>Проверено</option>
+                            <option value="Оплачено" ${client.paymentStatus === 'Оплачено' ? 'selected' : ''}>✅ Оплачено</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteClient(${client.id})">🗑️ Удалить</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            updateStats();
+        }
+
+        function updateClientType(clientId, type) {
+            const client = clients.find(c => c.id === clientId);
+            if (client) {
+                client.submitted = (type === 'submitted');
+                client.self = (type === 'self');
+                updateTable();
+            }
+        }
+
+        function toggleMarked(clientId) {
+            const client = clients.find(c => c.id === clientId);
+            if (client) {
+                client.marked = !client.marked;
+                updateTable();
+            }
+        }
+
+        function toggleChecked(clientId) {
+            const client = clients.find(c => c.id === clientId);
+            if (client) {
+                client.checked = !client.checked;
+                updateTable();
+            }
+        }
+
+        function updatePaymentStatus(clientId, status) {
+            const client = clients.find(c => c.id === clientId);
+            if (client) {
+                client.paymentStatus = status;
+                updateTable();
+            }
+        }
+
+        function deleteClient(clientId) {
+            if (confirm('Вы уверены, что хотите удалить этого клиента?')) {
+                clients = clients.filter(c => c.id !== clientId);
+                updateTable();
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('totalClients').textContent = clients.length;
+            document.getElementById('paidClients').textContent =
+                clients.filter(c => c.paymentStatus === 'Оплачено').length;
+            document.getElementById('checkedClients').textContent =
+                clients.filter(c => c.paymentStatus === 'Проверено').length;
+        }
+
+        // Сохранение данных в localStorage
+        function saveData() {
+            localStorage.setItem('clientsData', JSON.stringify(clients));
+        }
+
+        // Загрузка данных из localStorage
+        function loadData() {
+            const saved = localStorage.getItem('clientsData');
+            if (saved) {
+                clients = JSON.parse(saved);
+                updateTable();
+            }
+        }
+
+        // Автосохранение при изменениях
+        const originalUpdateTable = updateTable;
+        updateTable = function() {
+            originalUpdateTable();
+            saveData();
+        };
+
+        // Загрузка данных при старте
+        loadData();
+    </script>
+</body>
+</html>
