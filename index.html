@@ -239,7 +239,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="checkedClients">0</div>
-                <div class="stat-label">Проверено</div>
+                <div class="stat-label">Проверено / Помечено</div>
             </div>
         </div>
 
@@ -270,15 +270,14 @@
                 <thead>
                     <tr>
                         <th>Имя клиента</th>
-                        <th>Подал / Сам</th>
-                        <th>Пометить / Проверить</th>
-                        <th>Статус оплаты</th>
+                        <th>Тип</th>
+                        <th>Статусы</th>
                         <th>Действия</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
                     <tr>
-                        <td colspan="5" class="empty-state">
+                        <td colspan="4" class="empty-state">
                             Нет данных. Добавьте клиента из списка выше.
                         </td>
                     </tr>
@@ -308,11 +307,14 @@
             const client = {
                 id: Date.now(),
                 name: clientName,
+                type: 'submitted_self', // 'submitted_self' или 'paid'
+                // Для "Подал сам"
+                inCRM: false,
+                verified: false,
+                // Для "Оплатил"
                 submitted: false,
-                self: false,
-                marked: false,
-                checked: false,
-                paymentStatus: 'Не оплачено'
+                inCRM_paid: false,
+                marked: false
             };
 
             clients.push(client);
@@ -326,7 +328,7 @@
             if (clients.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" class="empty-state">
+                        <td colspan="4" class="empty-state">
                             Нет данных. Добавьте клиента из списка выше.
                         </td>
                     </tr>
@@ -335,57 +337,77 @@
                 return;
             }
 
-            tbody.innerHTML = clients.map(client => `
-                <tr>
-                    <td><strong>${client.name}</strong></td>
-                    <td>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="radio" name="type_${client.id}"
-                                    ${client.submitted ? 'checked' : ''}
-                                    onchange="updateClientType(${client.id}, 'submitted')">
-                                Подал
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="radio" name="type_${client.id}"
-                                    ${client.self ? 'checked' : ''}
-                                    onchange="updateClientType(${client.id}, 'self')">
-                                Сам
-                            </label>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox"
-                                    ${client.marked ? 'checked' : ''}
-                                    onchange="toggleMarked(${client.id})">
-                                Пометить
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox"
-                                    ${client.checked ? 'checked' : ''}
-                                    onchange="toggleChecked(${client.id})">
-                                Проверить
-                            </label>
-                        </div>
-                    </td>
-                    <td>
-                        <select class="status-select"
-                            value="${client.paymentStatus}"
-                            onchange="updatePaymentStatus(${client.id}, this.value)">
-                            <option value="Не оплачено" ${client.paymentStatus === 'Не оплачено' ? 'selected' : ''}>Не оплачено</option>
-                            <option value="Подано" ${client.paymentStatus === 'Подано' ? 'selected' : ''}>Подано</option>
-                            <option value="Помечено" ${client.paymentStatus === 'Помечено' ? 'selected' : ''}>Помечено</option>
-                            <option value="Проверено" ${client.paymentStatus === 'Проверено' ? 'selected' : ''}>Проверено</option>
-                            <option value="Оплачено" ${client.paymentStatus === 'Оплачено' ? 'selected' : ''}>✅ Оплачено</option>
-                        </select>
-                    </td>
-                    <td>
-                        <button class="delete-btn" onclick="deleteClient(${client.id})">🗑️ Удалить</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = clients.map(client => {
+                // Формируем чекбоксы в зависимости от типа
+                let statusCheckboxes = '';
+                if (client.type === 'submitted_self') {
+                    statusCheckboxes = `
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                ${client.inCRM ? 'checked' : ''}
+                                onchange="toggleStatus(${client.id}, 'inCRM')">
+                            Проставлено в CRM
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                ${client.verified ? 'checked' : ''}
+                                onchange="toggleStatus(${client.id}, 'verified')">
+                            Проверено
+                        </label>
+                    `;
+                } else { // paid
+                    statusCheckboxes = `
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                ${client.submitted ? 'checked' : ''}
+                                onchange="toggleStatus(${client.id}, 'submitted')">
+                            Подали
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                ${client.inCRM_paid ? 'checked' : ''}
+                                onchange="toggleStatus(${client.id}, 'inCRM_paid')">
+                            Проставлено в CRM
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                ${client.marked ? 'checked' : ''}
+                                onchange="toggleStatus(${client.id}, 'marked')">
+                            Помечено
+                        </label>
+                    `;
+                }
+
+                return `
+                    <tr>
+                        <td><strong>${client.name}</strong></td>
+                        <td>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="type_${client.id}"
+                                        ${client.type === 'submitted_self' ? 'checked' : ''}
+                                        onchange="updateClientType(${client.id}, 'submitted_self')">
+                                    Подал сам
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="type_${client.id}"
+                                        ${client.type === 'paid' ? 'checked' : ''}
+                                        onchange="updateClientType(${client.id}, 'paid')">
+                                    Оплатил
+                                </label>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="checkbox-group">
+                                ${statusCheckboxes}
+                            </div>
+                        </td>
+                        <td>
+                            <button class="delete-btn" onclick="deleteClient(${client.id})">🗑️ Удалить</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
 
             updateStats();
         }
@@ -393,32 +415,24 @@
         function updateClientType(clientId, type) {
             const client = clients.find(c => c.id === clientId);
             if (client) {
-                client.submitted = (type === 'submitted');
-                client.self = (type === 'self');
+                client.type = type;
+                // Сбрасываем все статусы при смене типа
+                if (type === 'submitted_self') {
+                    client.inCRM = false;
+                    client.verified = false;
+                } else {
+                    client.submitted = false;
+                    client.inCRM_paid = false;
+                    client.marked = false;
+                }
                 updateTable();
             }
         }
 
-        function toggleMarked(clientId) {
+        function toggleStatus(clientId, field) {
             const client = clients.find(c => c.id === clientId);
             if (client) {
-                client.marked = !client.marked;
-                updateTable();
-            }
-        }
-
-        function toggleChecked(clientId) {
-            const client = clients.find(c => c.id === clientId);
-            if (client) {
-                client.checked = !client.checked;
-                updateTable();
-            }
-        }
-
-        function updatePaymentStatus(clientId, status) {
-            const client = clients.find(c => c.id === clientId);
-            if (client) {
-                client.paymentStatus = status;
+                client[field] = !client[field];
                 updateTable();
             }
         }
@@ -433,9 +447,9 @@
         function updateStats() {
             document.getElementById('totalClients').textContent = clients.length;
             document.getElementById('paidClients').textContent =
-                clients.filter(c => c.paymentStatus === 'Оплачено').length;
+                clients.filter(c => c.type === 'paid').length;
             document.getElementById('checkedClients').textContent =
-                clients.filter(c => c.paymentStatus === 'Проверено').length;
+                clients.filter(c => c.verified || (c.type === 'paid' && c.marked)).length;
         }
 
         // Сохранение данных в localStorage
@@ -503,14 +517,18 @@
                 }
 
                 // Создаем клиента
+                const type = columns[1] ? columns[1].trim().replace(/^["']|["']$/g, '') : 'submitted_self';
                 const client = {
                     id: Date.now() + i,
                     name: name,
-                    submitted: columns[1] === 'true' || columns[1] === '1',
-                    self: columns[2] === 'true' || columns[2] === '1',
-                    marked: columns[3] === 'true' || columns[3] === '1',
-                    checked: columns[4] === 'true' || columns[4] === '1',
-                    paymentStatus: columns[5] ? columns[5].trim() : 'Не оплачено'
+                    type: type, // 'submitted_self' или 'paid'
+                    // Для "Подал сам"
+                    inCRM: columns[2] === 'true' || columns[2] === '1',
+                    verified: columns[3] === 'true' || columns[3] === '1',
+                    // Для "Оплатил"
+                    submitted: columns[4] === 'true' || columns[4] === '1',
+                    inCRM_paid: columns[5] === 'true' || columns[5] === '1',
+                    marked: columns[6] === 'true' || columns[6] === '1'
                 };
 
                 clients.push(client);
@@ -552,15 +570,16 @@
                 return;
             }
 
-            let csv = 'Имя клиента,Подал,Сам,Пометить,Проверить,Статус оплаты\n';
+            let csv = 'Имя клиента,Тип,Проставлено в CRM (подал сам),Проверено,Подали (оплатил),Проставлено в CRM (оплатил),Помечено\n';
 
             clients.forEach(client => {
                 csv += `"${client.name}",`;
+                csv += `"${client.type}",`;
+                csv += `${client.inCRM ? '1' : '0'},`;
+                csv += `${client.verified ? '1' : '0'},`;
                 csv += `${client.submitted ? '1' : '0'},`;
-                csv += `${client.self ? '1' : '0'},`;
-                csv += `${client.marked ? '1' : '0'},`;
-                csv += `${client.checked ? '1' : '0'},`;
-                csv += `"${client.paymentStatus}"\n`;
+                csv += `${client.inCRM_paid ? '1' : '0'},`;
+                csv += `${client.marked ? '1' : '0'}\n`;
             });
 
             // Создаем blob и скачиваем файл
