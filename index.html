@@ -611,6 +611,8 @@
         <div class="button-group" style="margin-bottom: 20px;">
             <input type="file" id="csvFileInput" class="file-input" accept=".csv" onchange="loadCSV(event)">
             <button class="btn-secondary" onclick="document.getElementById('csvFileInput').click()">Загрузить CSV</button>
+            <input type="file" id="importTableInput" class="file-input" accept=".csv" onchange="importTableData(event)">
+            <button class="btn-secondary" onclick="document.getElementById('importTableInput').click()">Импортировать таблицу</button>
             <button class="btn-success" onclick="exportToCSV()">Экспортировать CSV</button>
             <button class="btn-secondary" onclick="clearAllData()">Очистить данные</button>
         </div>
@@ -1186,6 +1188,103 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        // Импорт данных таблицы из CSV
+        function importTableData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    const lines = text.split('\n').filter(line => line.trim());
+
+                    if (lines.length < 2) {
+                        alert('Файл пустой или содержит только заголовок!');
+                        return;
+                    }
+
+                    // Пропускаем заголовок
+                    const dataLines = lines.slice(1);
+                    const importedClients = [];
+
+                    dataLines.forEach((line, index) => {
+                        try {
+                            // Парсинг CSV с учетом кавычек
+                            const matches = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g);
+                            if (!matches || matches.length < 8) {
+                                console.warn(`Строка ${index + 2} пропущена: неверный формат`);
+                                return;
+                            }
+
+                            // Убираем кавычки из значений
+                            const values = matches.map(val => val.replace(/^"|"$/g, '').trim());
+
+                            const client = {
+                                id: Date.now() + index, // Уникальный ID
+                                nip: values[0],
+                                nazwa: values[1],
+                                type: values[2],
+                                inCRM: values[3] === '1',
+                                verified: values[4] === '1',
+                                submitted: values[5] === '1',
+                                inCRM_paid: values[6] === '1',
+                                marked: values[7] === '1'
+                            };
+
+                            importedClients.push(client);
+                        } catch (err) {
+                            console.error(`Ошибка парсинга строки ${index + 2}:`, err);
+                        }
+                    });
+
+                    if (importedClients.length === 0) {
+                        alert('Не удалось импортировать данные. Проверьте формат файла.');
+                        return;
+                    }
+
+                    // Спрашиваем пользователя о замене или добавлении
+                    const replace = confirm(
+                        `Найдено ${importedClients.length} записей.\n\n` +
+                        `Заменить текущие данные (${clients.length} записей)?\n\n` +
+                        `OK - Заменить все данные\n` +
+                        `Отмена - Добавить к существующим`
+                    );
+
+                    if (replace) {
+                        clients = importedClients;
+                        alert(`Импортировано ${importedClients.length} записей. Предыдущие данные заменены.`);
+                    } else {
+                        // Проверяем дубликаты по NIP
+                        const existingNips = new Set(clients.map(c => c.nip));
+                        const newClients = importedClients.filter(c => !existingNips.has(c.nip));
+                        const duplicates = importedClients.length - newClients.length;
+
+                        clients = clients.concat(newClients);
+                        alert(
+                            `Добавлено ${newClients.length} новых записей.\n` +
+                            (duplicates > 0 ? `Пропущено ${duplicates} дубликатов.` : '')
+                        );
+                    }
+
+                    updateTable();
+
+                    // Очищаем input для возможности повторной загрузки
+                    event.target.value = '';
+
+                } catch (error) {
+                    console.error('Ошибка импорта:', error);
+                    alert('Ошибка при импорте файла! Проверьте консоль для деталей.');
+                }
+            };
+
+            reader.onerror = function() {
+                alert('Ошибка чтения файла!');
+            };
+
+            reader.readAsText(file, 'UTF-8');
         }
 
         // Очистка всех данных
