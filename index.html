@@ -973,7 +973,7 @@
                 // Синхронизация с сервером
                 if (useServerSync) {
                     try {
-                        await fetch('/api/data', {
+                        const response = await fetch('/api/data', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -983,9 +983,17 @@
                                 availableClients: availableClients
                             })
                         });
-                        console.log('✅ Данные сохранены на сервер');
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('❌ Ошибка сохранения на сервер:', response.status, errorText);
+                            alert('Ошибка сохранения данных на сервер! Проверьте консоль для деталей.');
+                        } else {
+                            console.log('✅ Данные сохранены на сервер (клиентов: ' + clients.length + ')');
+                        }
                     } catch (error) {
                         console.error('❌ Ошибка сохранения на сервер:', error);
+                        alert('Ошибка сохранения данных: ' + error.message);
                     }
                 }
             } finally {

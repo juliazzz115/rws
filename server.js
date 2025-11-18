@@ -5,8 +5,9 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware для парсинга JSON
-app.use(express.json());
+// Middleware для парсинга JSON (увеличен лимит для больших объемов данных)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Middleware для обслуживания статических файлов
 app.use(express.static(__dirname));
