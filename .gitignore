@@ -16,3 +16,20 @@ data.json
 # OS files
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Script outputs
+scripts/nip_dates_result_*.csv
+scripts/clients_individual.csv
